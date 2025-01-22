@@ -1,121 +1,8 @@
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { toast } from "react-toastify";
-
-
-// const TaskForm = () => {
-//   const [title, setTitle] = useState('');
-//   const [description, setDescription] = useState('');
-//   const [status, setStatus] = useState('pending');
-//   const [priority, setPriority] = useState('medium');
-
-//   const navigate = useNavigate();
-
-//   const submitForm = (e) => {
-//     e.preventDefault();
-
-//     const newTask = {
-//       title,
-//       description,
-//       status,
-//       priority,
-//     };
-
-//     const res = addTask(newTask);
-//     toast.success("Task added successfully");
-//     navigate("/task");
-//     console.log(res);
-//   };
-
-//   const addTask = async (newTask) => {
-//     const res = await fetch("api/tasks", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(newTask),
-//     });
-//     return res;
-//   };
-
-//   return (
-//     <div>
-//       <div className="container m-auto max-w-2xl py-2">
-//       <h1>Add Task</h1>
-
-//       <form onSubmit={submitForm}>
-//         <div>
-//           <label>Task Title:</label>
-//           <input
-//             type="text"
-//             id="title"
-//             value={title}
-//             onChange={(e) => setTitle(e.target.value)}
-//             placeholder="Title"
-//             className="border rounded w-full py-2 px-3"
-
-//           />
-//         </div>
-//         <div>
-//           <label>Task Description:</label>
-//           <input
-//             type="text"
-//             id="description"
-//             value={description}
-//             onChange={(e) => setDescription(e.target.value)}
-//             placeholder="Description"
-//             className="border rounded w-full py-2 px-3"
-
-//           />
-//         </div>
-//         <div>
-//           <label>Task Status</label>
-//           <select
-//             value={status}
-//             onChange={(e) => setStatus(e.target.value)}
-//             className="border rounded w-full py-2 px-3"
-
-//           >
-//             <option value="pending">Pending</option>
-//             <option value="in-progress">In-Progress</option>
-//             <option value="completed">Completed</option>
-//           </select>
-//         </div>
-//         <div>
-//           <label>Task Priority</label>
-//           <select
-//             value={priority}
-//             onChange={(e) => setPriority(e.target.value)}
-//             className="border rounded w-full py-2 px-3"
-
-//           >
-//             <option value="low">Low</option>
-//             <option value="medium">Medium</option>
-//             <option value="high">High</option>
-//           </select>
-//         </div>
-
-//         <div>
-//                 <button
-//                   className="bg-blue-500 hover:bg-blue-600 my-10  text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline"
-//                   type="submit"
-//                 >
-//                   Add Task
-//                 </button>
-//               </div>
-//       </form>
-//       </div>
-
-//     </div>
-//   );
-// };
-
-// export default TaskForm;
 
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
-const AdminDashboard = () => {
+const TaskForm = () => {
   const [tasks, setTasks] = useState([]);
   const[editingTasks, setEditingTasks] = useState(null);
   const [title, setTitle] = useState('');
@@ -123,6 +10,23 @@ const AdminDashboard = () => {
   const [status, setStatus] = useState('pending');
   const [priority, setPriority] = useState('medium');
 
+  const fetchTasks = async () => {
+    try {
+        const res = await fetch("/api/tasks", { credentials: "include" });
+        if (res.ok) {
+            const data = await res.json();
+            setTasks(data);
+        } else {
+            toast.error("Failed to fetch task");
+        }
+    } catch (error) {
+        toast.error("Error fetching tasks");
+    }
+};
+
+useEffect(() => {
+    fetchTasks();
+}, []);
 
 
     // Add User
@@ -139,6 +43,8 @@ const AdminDashboard = () => {
             });
             if (res.ok) {
                 toast.success("Task added successfully");
+                fetchTasks();
+
                 resetForm();
             } else {
                 toast.error("Failed to add Task");
@@ -171,6 +77,8 @@ const AdminDashboard = () => {
             });
             if (res.ok) {
                 toast.success("Tasks updated successfully");
+                fetchTasks();
+
                 resetForm();
             } else {
                 toast.error("Failed to update task");
@@ -253,9 +161,9 @@ const AdminDashboard = () => {
                                 marginBottom: "10px",
                             }}
                         >
-                            <option value="user">Pending</option>
-                            <option value="pharmacist">In-progress</option>
-                            <option value="pharmacist">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In-progress</option>
+                            <option value="completed">Completed</option>
 
                         </select>
                         <label >Priority</label>
@@ -311,15 +219,21 @@ const AdminDashboard = () => {
                             >
                                 <div>
                                     <span style={{ fontSize: "16px", fontWeight: "bold", color: "#333" }}>
-                                        {task.title} ({task.title})
+                                        {tasks.title} ({task.title})
                                     </span>
                                     <span style={{ display: "block", fontSize: "14px", color: "#666" }}>
-                                        Status: {user.status}
+                                        Description{task.description}
+                                    </span>
+                                    <span style={{ display: "block", fontSize: "14px", color: "#666" }}>
+                                        Status: {task.status}
+                                    </span>
+                                    <span style={{ display: "block", fontSize: "14px", color: "#666" }}>
+                                        Priority {task.priority}
                                     </span>
                                 </div>
                                 <div style={{ display: "flex", gap: "10px" }}>
                                     <button
-                                        onClick={() => editUser(user)}
+                                        onClick={() => editTasks(task)}
                                         style={{
                                             backgroundColor: "#ffc107",
                                             color: "#fff",
@@ -353,5 +267,5 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default TaskForm;
 
